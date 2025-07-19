@@ -1,0 +1,49 @@
+# PlatformIO
+.pio/
+.vscode/
+build/
+
+# OS/Editor
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+*.swo
+*.bak
+*.tmp
+*.log
+*.code-workspace
+
+# Python
+*.pyc
+__pycache__/
+
+# Secrets（個人情報やパスワードを含むファイルは除外推奨）
+include/secrets.h
+
+# Arduino/ESP32
+*.eep
+*.elf
+*.hex
+*.bin
+*.dmp
+*.map
+*.srec
+*.dat
+*.csv
+*.mss
+*.lst
+*.sym
+*.lss
+*.o
+*.a
+*.d
+*.dep
+*.gz
+*.zip
+*.tar
+*.tgz
+*.7z
+
+# Test
+*.test*

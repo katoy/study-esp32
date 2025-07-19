@@ -1,0 +1,39 @@
+# Arduino build files
+*.ino.cpp
+*.elf
+*.hex
+*.bin
+*.eep
+*.map
+*.dmp
+*.srec
+*.lst
+*.obj
+*.o
+*.d
+*.a
+*.pyc
+*.pyo
+*.swp
+*.bak
+*.tmp
+*.DS_Store
+
+# VSCode
+.vscode/
+
+# MacOS
+.DS_Store
+
+# Logs
+*.log
+
+# Arduino libraries (if downloaded locally)
+libraries/
+
+# Build output
+build/
+
+# Other
+*.orig
+*.rej
