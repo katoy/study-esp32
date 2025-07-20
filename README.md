@@ -6,3 +6,4 @@
 
 - `arduino/`: Arduino IDE を使用したサンプルプロジェクト
 - `platformio/`: PlatformIO を使用したサンプルプロジェクト
+- `web_page/`: ESP32でホストするWebページのサンプル

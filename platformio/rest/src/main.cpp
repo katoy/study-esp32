@@ -49,6 +49,7 @@ void setup() {
     request->send(200, "text/plain", "LED RESET");
   });
 
+  DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
   server.begin();
 }
 
