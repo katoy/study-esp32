@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP32 LED Control</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>ESP32 LED Control</h1>
+    <div class="container">
+        <div style="margin-bottom: 18px;">
+            <label for="ip_address">IP Address:</label>
+            <input type="text" id="ip_address" value="192.168.0.123">
+        </div>
+        <div class="btn-group">
+            <button onclick="ledOn()">LED ON</button>
+            <button onclick="ledOff()">LED OFF</button>
+            <button onclick="ledReset()">LED RESET</button>
+        </div>
+        <p>Status: <span id="status"></span></p>
+    </div>
+
+    <script>
+        async function sendCommand(command) {
+            const ip_address = document.getElementById('ip_address').value;
+            try {
+                const response = await fetch(`http://${ip_address}/led/${command}`);
+                const status = await response.text();
+                document.getElementById('status').textContent = status;
+            } catch (error) {
+                document.getElementById('status').textContent = 'Error';
+            }
+        }
+        function ledOn() {
+            sendCommand('on');
+        }
+        function ledOff() {
+            sendCommand('off');
+        }
+        function ledReset() {
+            sendCommand('reset');
+        }
+    </script>
+</body>
+</html>
