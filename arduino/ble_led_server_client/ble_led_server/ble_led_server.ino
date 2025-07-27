@@ -46,10 +46,7 @@ class MyServerCallbacks: public BLEServerCallbacks {
     }
 };
 
-void setup() {
-  Serial.begin(115200);
-  Serial.println("Starting BLE Server...");
-
+void setupLed() {
   // Setup pins
   pinMode(BOOT_BUTTON_PIN, INPUT_PULLUP);
   pinMode(LED_PIN, OUTPUT);
@@ -57,7 +54,9 @@ void setup() {
   // Initialize LED state
   digitalWrite(LED_PIN, ledState);
   lastButtonState = digitalRead(BOOT_BUTTON_PIN);
+}
 
+void setupBluetooth() {
   BLEDevice::init(DEVICE_NAME);
   BLEServer*     pServer = BLEDevice::createServer();
   pServer->setCallbacks(new MyServerCallbacks());
@@ -76,6 +75,14 @@ void setup() {
 
   pAdv->start();
   Serial.println("Advertising started.");
+}
+
+void setup() {
+  Serial.begin(115200);
+  Serial.println("Starting BLE Server...");
+
+  setupLed();
+  setupBluetooth();
 }
 
 // ボタン入力を処理し、LED の状態をトグルする
