@@ -1,54 +1,97 @@
-// minimal_ble_client_final.ino
 #include <BLEDevice.h>
+#include <BLEScan.h>
+#include <BLEAdvertisedDevice.h>
+#include <BLEClient.h>
+#include <BLEUtils.h>
 
-constexpr char    TARGET_NAME[]         = "MINI_SERVER_NAME";
-constexpr uint16_t MANUFACTURER_ID      = 0xFFFF;
-constexpr char    MANUFACTURER_STRING[] = "MINI_TEST";
-// Company ID(2) + 文字列長
-constexpr int     EXPECTED_MD_LEN       = 2 + sizeof(MANUFACTURER_STRING) - 1;
+// サーバー側と同じ定義
+const char   DEVICE_NAME[]         = "MINI_SERVER_NAME";
+constexpr uint16_t MANUFACTURER_ID  = 0xFFFF;
 
-class MyCallbacks : public BLEAdvertisedDeviceCallbacks {
-  void onResult(BLEAdvertisedDevice advertisedDevice) override {
-    // 1) メーカー⽤データで検出
-    if (advertisedDevice.haveManufacturerData()) {
-      String md = advertisedDevice.getManufacturerData();
-      if (md.length() == EXPECTED_MD_LEN
-          && uint8_t(md.charAt(0)) == (MANUFACTURER_ID & 0xFF)
-          && uint8_t(md.charAt(1)) == (MANUFACTURER_ID >> 8)
-          && md.substring(2) == MANUFACTURER_STRING) {
-        Serial.println("=== MINI SERVER FOUND by Manufacturer Data ===");
-        BLEScan* scan = BLEDevice::getScan();
-        scan->stop();
-        scan->clearResults();
-        return;
-      }
-    }
+String        serverAddrStr;
+bool          shouldConnect     = false;
+bool          connectedFlag     = false;
+BLEClient*    client            = nullptr;
+BLEScan*      scanner           = nullptr;
 
-    // 2) 名前で検出（Scan Response にも対応）
-    if (advertisedDevice.haveName()
-        && advertisedDevice.getName() == TARGET_NAME) {
-      Serial.println("=== MINI SERVER FOUND by Name ===");
-      BLEScan* scan = BLEDevice::getScan();
-      scan->stop();
-      scan->clearResults();
+// スキャン開始
+void startScan() {
+  Serial.println("Client: >>> start scan (5s)");
+  scanner->start(5, false);
+}
+
+// 検出コールバック
+class ScanCB : public BLEAdvertisedDeviceCallbacks {
+  void onResult(BLEAdvertisedDevice adv) override {
+    if (adv.haveName() && adv.getName().equals(DEVICE_NAME)) {
+      Serial.println("Client: Found by name");
+      serverAddrStr = adv.getAddress().toString();
+      shouldConnect = true;
+      scanner->stop();
       return;
     }
+    if (adv.haveManufacturerData()) {
+      String md = adv.getManufacturerData();
+      if (md.length() >= 2) {
+        uint16_t id = ((uint8_t)md[1] << 8) | (uint8_t)md[0];
+        if (id == MANUFACTURER_ID) {
+          Serial.println("Client: Found by manufacturer data");
+          serverAddrStr = adv.getAddress().toString();
+          shouldConnect = true;
+          scanner->stop();
+          return;
+        }
+      }
+    }
+  }
+};
+
+// 接続コールバック
+class ClientCB : public BLEClientCallbacks {
+  void onConnect(BLEClient*) override {
+    Serial.println("Client: connected");
+    connectedFlag = true;
+  }
+  void onDisconnect(BLEClient*) override {
+    Serial.println("Client: disconnected → will rescan");
+    connectedFlag = false;
+    shouldConnect = false;
   }
 };
 
 void setup() {
   Serial.begin(115200);
-  Serial.println("Starting BLE Client...");
+  while (!Serial) delay(10);
+  Serial.println("Client: init");
 
   BLEDevice::init("");
-  BLEScan* pScan = BLEDevice::getScan();
-  pScan->setAdvertisedDeviceCallbacks(new MyCallbacks());
-  pScan->setActiveScan(true);
-  pScan->start(0, false);  // 0秒＝見つかるまでスキャンを継続
-
-  Serial.println("Scanning for MINI_SERVER_NAME...");
+  scanner = BLEDevice::getScan();
+  scanner->setAdvertisedDeviceCallbacks(new ScanCB());
+  scanner->setActiveScan(true);
+  scanner->setInterval(100);
+  scanner->setWindow(50);
 }
 
 void loop() {
-  delay(1000);
+  if (!connectedFlag) {
+    if (shouldConnect) {
+      Serial.print("Client: connecting to ");
+      Serial.println(serverAddrStr);
+      BLEAddress addr(serverAddrStr);
+      client = BLEDevice::createClient();
+      client->setClientCallbacks(new ClientCB());
+      // 変更後（2秒でタイムアウトさせる例）
+      const uint32_t CONNECT_TIMEOUT_MS = 2000;
+      if (!client->connect(addr, BLE_ADDR_TYPE_PUBLIC, CONNECT_TIMEOUT_MS)) {
+        Serial.println("Client: connect NG (timeout) → retry scan");
+        shouldConnect = false;
+      }
+    } else {
+      startScan();
+      BLEScanResults* res = scanner->start(5, false);
+      Serial.printf("Client: scan done, %d devices seen\n", res->getCount());
+      scanner->clearResults();
+    }
+  }
+  delay(500);
 }

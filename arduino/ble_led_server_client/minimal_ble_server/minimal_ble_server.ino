@@ -21,12 +21,26 @@ static String makeManufacturerData() {
   return md;
 }
 
+class MyServerCallbacks: public BLEServerCallbacks {
+    void onConnect(BLEServer* pServer) {
+      Serial.println("Connected");
+      pServer->getAdvertising()->stop();
+    }
+
+    void onDisconnect(BLEServer* pServer) {
+      Serial.println("Disconnected");
+      pServer->getAdvertising()->start();
+      Serial.println("Advertising restarted.");
+    }
+};
+
 void setup() {
   Serial.begin(115200);
   Serial.println("Starting BLE Server...");
 
   BLEDevice::init(DEVICE_NAME);
   BLEServer*     pServer = BLEDevice::createServer();
+  pServer->setCallbacks(new MyServerCallbacks());
   BLEAdvertising* pAdv    = BLEDevice::getAdvertising();
 
   // 広告データをまとめて設定
