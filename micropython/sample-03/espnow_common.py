@@ -6,6 +6,14 @@ CHANNEL = 6
 # ブロードキャスト MAC
 BCAST = b'\xff\xff\xff\xff\xff\xff'
 
+# コマンド/状態メッセージ
+CMD_TOGGLE = b"toggle"
+CMD_ON = b"on"
+CMD_OFF = b"off"
+CMD_STATE_REQ = b"ESP?"
+STATE_ON = b"STATE:ON"
+STATE_OFF = b"STATE:OFF"
+
 def init_espnow(channel: int = CHANNEL):
     """
     AP無効 / STA有効 / 省電力OFF / チャネル固定 → ESP-NOW 有効化
