@@ -1,0 +1,4 @@
+#pragma once
+
+const char* ssid = "xxxx"; // 各自のルータのSSIDを記入
+const char* password = "xxxx"; // 各自のルータのパスワードを記入

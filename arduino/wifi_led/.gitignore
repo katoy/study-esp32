@@ -1,0 +1,19 @@
+# Local config
+config.h
+
+# Build files
+build/
+*.o
+*.a
+*.elf
+*.bin
+*.hex
+*.eep
+*.lss
+*.sym
+*.map
+*.dep
+
+# Other
+*~
+.DS_Store
