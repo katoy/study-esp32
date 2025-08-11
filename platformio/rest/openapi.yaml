@@ -1,0 +1,40 @@
+openapi: 3.0.0
+info:
+  title: ESP32 LED Control API
+  version: 1.0.0
+servers:
+  - url: http://{ip_address}
+    variables:
+      ip_address:
+        default: 192.168.0.123
+paths:
+  /led/on:
+    get:
+      summary: Turn LED ON
+      responses:
+        '200':
+          description: LED turned ON
+          content:
+            text/plain:
+              schema:
+                type: string
+  /led/off:
+    get:
+      summary: Turn LED OFF
+      responses:
+        '200':
+          description: LED turned OFF
+          content:
+            text/plain:
+              schema:
+                type: string
+  /led/reset:
+    get:
+      summary: Reset LED (blink)
+      responses:
+        '200':
+          description: LED reset
+          content:
+            text/plain:
+              schema:
+                type: string
