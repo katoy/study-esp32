@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ESP32 LED Control</title>ß
+  <style>
+    body {
+      background: linear-gradient(120deg, #e0eafc, #cfdef3);
+      font-family: 'segos UI', 'Roboto', Arial, sans-serif;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      padding: 32px 24px;
+      margin-top: 60px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+    }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1.2em;
+      color: #1976d2;
+    }
+    #led-status {
+      font-size: 1.2em;
+      margin-bottom: 2em;
+      font-weight: bold;
+      color: #388e3c;
+    }
+    .btn {
+      display: inline-block;
+      padding: 0.7em 2em;
+      margin: 0.5em;
+      font-size: 1em;
+      border-radius: 8px;
+      border: none;
+      background: #1976d2;
+      color: #fff;
+      text-decoration: none;
+      transition: background 0.2s, box-shadow 0.2s;
+      box-shadow: 0 2px 8px rgba(25, 118, 210, 0.08);
+      cursor: pointer;
+    }
+    .btn:hover {
+      background: #1565c0;
+    }
+    footer {
+      margin-top: 40px;
+      color: #888;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>ESP32 LED Control</h1>
+    <p id="led-status">LED is currently %LED_STATUS%</p>
+    <a href="/LED_ON" class="btn">Turn ON</a>
+    <a href="/LED_OFF" class="btn">Turn OFF</a>
+  </div>
+  <footer>Powered by ESP32 &mdash; Study Project</footer>
+</body>
+</html>
