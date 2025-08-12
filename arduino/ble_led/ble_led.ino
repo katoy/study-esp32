@@ -1,4 +1,5 @@
-
+// ESP32 BLE Arduino（Kolban/標準コアのBLE）を使う場合 =====
+#include <Arduino.h>
 #include <BLEDevice.h>
 #include <BLEServer.h>
 #include <BLEUtils.h>
