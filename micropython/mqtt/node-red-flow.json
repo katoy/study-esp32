@@ -1,0 +1,177 @@
+[
+    {
+        "id": "a71c74c89809889d",
+        "type": "mqtt out",
+        "z": "aca2c542bd40bdbf",
+        "name": "led_cmd",
+        "topic": "esp32/led/cmd",
+        "qos": "1",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "3fb410590e872833",
+        "x": 360,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "12cb2b059bc4da87",
+        "type": "mqtt in",
+        "z": "aca2c542bd40bdbf",
+        "name": "led_cmd",
+        "topic": "esp32/led/cmd",
+        "qos": "2",
+        "datatype": "utf8",
+        "broker": "3fb410590e872833",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 360,
+        "y": 140,
+        "wires": [
+            [
+                "27374b4288c089e0"
+            ]
+        ]
+    },
+    {
+        "id": "27374b4288c089e0",
+        "type": "debug",
+        "z": "aca2c542bd40bdbf",
+        "name": "debug 13",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": true,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "payload",
+        "statusType": "auto",
+        "x": 520,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "c4b05d70fd7adac5",
+        "type": "inject",
+        "z": "aca2c542bd40bdbf",
+        "name": "on",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "on",
+        "payloadType": "str",
+        "x": 130,
+        "y": 80,
+        "wires": [
+            [
+                "a71c74c89809889d"
+            ]
+        ]
+    },
+    {
+        "id": "f5cb91e0d305a4bf",
+        "type": "inject",
+        "z": "aca2c542bd40bdbf",
+        "name": "off",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "off",
+        "payloadType": "str",
+        "x": 130,
+        "y": 140,
+        "wires": [
+            [
+                "a71c74c89809889d"
+            ]
+        ]
+    },
+    {
+        "id": "c8f7030afe7b4ad8",
+        "type": "mqtt in",
+        "z": "aca2c542bd40bdbf",
+        "name": "led_status",
+        "topic": "esp32/led/status",
+        "qos": "2",
+        "datatype": "utf8",
+        "broker": "3fb410590e872833",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 120,
+        "y": 220,
+        "wires": [
+            [
+                "a0561c7a9ee3bcc9"
+            ]
+        ]
+    },
+    {
+        "id": "a0561c7a9ee3bcc9",
+        "type": "debug",
+        "z": "aca2c542bd40bdbf",
+        "name": "debug 5",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": true,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "payload",
+        "statusType": "auto",
+        "x": 360,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "3fb410590e872833",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "192.168.0.104",
+        "port": 1883,
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": 4,
+        "keepalive": 60,
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    }
+]
