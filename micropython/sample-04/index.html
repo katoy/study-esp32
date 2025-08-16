@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <title>ESP32 LED</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <main class="wrap">
+    <header>
+      <h1>ESP32 LED</h1>
+    </header>
+    <section class="status">
+      <div class="state-line">GPIO <span class="pin-no">{{PIN}}</span> の状態: [<span id="led-state" class="state {{STATE_CLASS}}" aria-live="polite">{{STATE_TEXT}}</span>]</div>
+    </section>
+    <section class="controls" aria-label="LED 操作">
+      <button class="btn on"     onclick="act('on')">ON</button>
+      <button class="btn off"    onclick="act('off')">OFF</button>
+      <button class="btn toggle" onclick="act('toggle')">TOGGLE</button>
+    </section>
+    <p class="auto">自動更新: 1s / 物理ボタン反映</p>
+    <details class="diag">
+      <summary>API 情報</summary>
+      <code>GET /api/led<br>POST /api/led?state=on|off|toggle</code>
+    </details>
+  </main>
+  <script>
+  function setState(s){const el=document.getElementById('led-state');if(!el)return;el.textContent=s.toUpperCase();el.className='state '+(s==='on'?'on':'off');}
+  function poll(){fetch('/api/led',{cache:'no-store'}).then(r=>r.json()).then(j=>setState(j.led)).catch(()=>{});}
+  function act(c){
+    const btn=document.activeElement; if(btn) {btn.classList.add('busy');setTimeout(()=>btn.classList.remove('busy'),300);}
+    fetch('/api/led?state='+c,{method:'POST',cache:'no-store'}).then(()=>poll()).catch(()=>{});
+  }
+  setTimeout(poll,150);setInterval(poll,1000);
+  </script>
+</body>
+</html>
