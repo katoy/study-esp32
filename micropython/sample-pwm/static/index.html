@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset='UTF-8'>
+  <title>ESP32 Joystick</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h2>Joystick Status (リアルタイム更新)</h2>
+    <div class='label'>SW (Push): <span id='wval'>-</span></div>
+    <div class='label'>X: <span id='xval'>-</span></div>
+    <div id='xbar' class='bar' style='width:0px'></div>
+    <div class='label'>Y: <span id='yval'>-</span></div>
+    <div id='ybar' class='bar' style='width:0px'></div>
+    <div id='graph'><div id='dot'></div></div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

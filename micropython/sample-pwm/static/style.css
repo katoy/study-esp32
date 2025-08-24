@@ -1,0 +1,56 @@
+body {
+  font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+  background: #f4f6fa;
+  margin: 0;
+  padding: 0;
+}
+.container {
+  max-width: 400px;
+  margin: 40px auto;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  padding: 24px 20px 32px 20px;
+}
+h2 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 24px;
+}
+.label {
+  font-weight: bold;
+  color: #555;
+  margin-top: 12px;
+}
+.bar {
+  height: 18px;
+  background: linear-gradient(90deg, #4caf50 60%, #81c784 100%);
+  margin: 6px 0 12px 0;
+  border-radius: 9px;
+  box-shadow: 0 2px 6px rgba(76,175,80,0.08);
+}
+#graph {
+  width: 320px;
+  height: 320px;
+  border: 1.5px solid #4caf50;
+  border-radius: 16px;
+  position: relative;
+  background: #f9f9f9;
+  margin: 24px auto 0 auto;
+  box-shadow: 0 2px 12px rgba(76,175,80,0.07);
+}
+#dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: red;
+  position: absolute;
+  left: 0;
+  top: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  border: 2px solid #fff;
+}
+@media (max-width: 500px) {
+  .container { max-width: 98vw; padding: 8vw 2vw; }
+  #graph { width: 90vw; height: 90vw; min-width: 220px; min-height: 220px; }
+}

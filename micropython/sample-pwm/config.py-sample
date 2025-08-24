@@ -1,0 +1,10 @@
+# APモード用IPアドレス等の設定
+AP_CONFIG = {
+    'ip': '192.168.4.1',
+    'subnet': '255.255.255.0',
+    'gateway': '192.168.4.1',
+    'dns': '192.168.4.1',
+    'essid': 'ESP32-LED-JOYSTICK',
+    'ssid': '',      # ←ご自身のWi-Fi SSIDに変更してください
+    'password': ''   # ←ご自身のWi-Fiパスワードに変更してください
+}
