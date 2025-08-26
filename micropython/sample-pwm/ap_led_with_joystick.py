@@ -1,8 +1,18 @@
-import network
-import socket
-from config import AP_CONFIG
-from machine import Pin, ADC, PWM
 import time
+from machine import Pin, PWM
+import aioble
+import network
+from config import AP_CONFIG, BLE_CONFIG
+import uasyncio as asyncio
+import socket
+
+# LED初期化（GPIO18, 19）
+led1 = PWM(Pin(18), freq=1000)
+led2 = PWM(Pin(19), freq=1000)
+led_enabled = True
+x_val = 0
+y_val = 0
+sw_val = 1
 
 # Wi-Fi接続
 sta = network.WLAN(network.STA_IF)
@@ -12,58 +22,47 @@ while not sta.isconnected():
     pass
 ip_addr = sta.ifconfig()[0]
 print('Wi-Fi connected. IP address:', ip_addr)
-print(f'Web server URL: http://{ip_addr}:80')
 
-# ジョイスティック・LED初期化
-joystick_x = ADC(Pin(34))
-joystick_y = ADC(Pin(35))
-joystick_btn = Pin(33, Pin.IN, Pin.PULL_UP)
-joystick_x.atten(ADC.ATTN_11DB)
-joystick_y.atten(ADC.ATTN_11DB)
+# BLE Centralとしてsenderに接続し、値をグローバル変数に反映
+def set_leds():
+    global led_enabled, x_val, y_val, sw_val
+    x_percent = int((x_val / 4095) * 100)
+    y_percent = int((y_val / 4095) * 100)
+    led_enabled = (sw_val == 1)
+    if led_enabled:
+        led1.duty_u16(int(65535 * (x_percent / 100)))
+        led2.duty_u16(int(65535 * (y_percent / 100)))
+    else:
+        led1.duty_u16(0)
+        led2.duty_u16(0)
 
-# LED初期化（GPIO18, 19）
-led1 = PWM(Pin(18), freq=1000)
-led2 = PWM(Pin(19), freq=1000)
-
-led_enabled = True  # LEDのON/OFF状態
-last_btn_state = 1
-last_toggle_time = 0
-DEBOUNCE_MS = 50
-
-def set_brightness(pwm, percent):
-    duty = int(65535 * (percent / 100))
-    pwm.duty_u16(duty)
+async def ble_loop():
+    global x_val, y_val, sw_val
+    while True:
+        print('Scanning for joystick sender...')
+        device = await aioble.scan(name=BLE_CONFIG.get('name', 'ESP32-Joystick'), timeout_ms=5000)
+        if device:
+            print('Found sender, connecting...')
+            conn = await device.connect()
+            service = await conn.service(0x180F)
+            char = await service.characteristic(0x2A19)
+            while True:
+                data = await char.read()
+                x_val = int.from_bytes(data[0:2], 'little')
+                y_val = int.from_bytes(data[2:4], 'little')
+                sw_val = data[4]
+                set_leds()
+                await asyncio.sleep(0.1)
 
 # Webサーバ
-def start_web_server():
+async def web_server():
     addr = socket.getaddrinfo('0.0.0.0', 80)[0][-1]
     s = socket.socket()
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind(addr)
     s.listen(1)
     print(f'Web server listening on http://{ip_addr}:80')
-    global led_enabled, last_btn_state, last_toggle_time
     while True:
-        # --- LED制御 ---
-        x_val = joystick_x.read()
-        y_val = joystick_y.read()
-        x_percent = int((x_val / 4095) * 100)
-        y_percent = int((y_val / 4095) * 100)
-        btn_state = joystick_btn.value()
-        now = time.ticks_ms()
-        if btn_state == 0 and last_btn_state == 1:
-            if (now - last_toggle_time) > DEBOUNCE_MS:
-                led_enabled = not led_enabled
-                print("Button pushed! LED toggled:", led_enabled)
-                last_toggle_time = now
-        last_btn_state = btn_state
-        if led_enabled:
-            set_brightness(led1, x_percent)
-            set_brightness(led2, y_percent)
-        else:
-            set_brightness(led1, 0)
-            set_brightness(led2, 0)
-        # --- Webサーバ処理 ---
         cl, addr = s.accept()
         try:
             cl_file = cl.makefile('rwb', 0)
@@ -73,8 +72,7 @@ def start_web_server():
                 if not line or line == b'\r\n':
                     break
             if b'/status' in request_line:
-                # x_val, y_val, btn_stateはすでに取得済み
-                w_val = 0 if btn_state == 0 else 1
+                w_val = 0 if sw_val == 0 else 1
                 json = '{{"x": {}, "y": {}, "w": {}, "led": {}}}'.format(x_val, y_val, w_val, int(led_enabled))
                 cl.send('HTTP/1.0 200 OK\r\nContent-type: application/json; charset=UTF-8\r\n\r\n')
                 cl.send(json)
@@ -98,9 +96,8 @@ def start_web_server():
         finally:
             cl.close()
 
-start_web_server()
+# 並列でBLE受信・Webサーバ起動
+async def main():
+    await asyncio.gather(ble_loop(), web_server())
 
-# メインスレッドが終了しないようにする
-while True:
-    time.sleep(1)
-
+asyncio.run(main())

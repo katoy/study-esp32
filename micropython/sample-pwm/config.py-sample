@@ -6,5 +6,9 @@ AP_CONFIG = {
     'dns': '192.168.4.1',
     'essid': 'ESP32-LED-JOYSTICK',
     'ssid': '',      # ←ご自身のWi-Fi SSIDに変更してください
-    'password': ''   # ←ご自身のWi-Fiパスワードに変更してください
+    'password': '' # ←ご自身のWi-Fiパスワードに変更してください
+}
+
+BLE_CONFIG = {
+    'name': 'ESP32-Joystick',
 }

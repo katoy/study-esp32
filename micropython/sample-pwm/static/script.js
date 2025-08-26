@@ -1,5 +1,6 @@
 function updateStatus() {
   fetch('/status').then(r => r.json()).then(function(data) {
+    document.getElementById('ledstat').textContent = data.led ? "ON" : "OFF";
     document.getElementById('xval').textContent = data.x;
     document.getElementById('yval').textContent = data.y;
     document.getElementById('wval').textContent = data.w;
