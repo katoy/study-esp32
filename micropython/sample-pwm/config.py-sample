@@ -12,3 +12,10 @@ AP_CONFIG = {
 BLE_CONFIG = {
     'name': 'ESP32-Joystick',
 }
+
+WEB_CONFIG = {
+    'port': 80,
+    'title': 'ESP32 BLE LED Server',
+    'refresh_interval_ms': 300,
+    # 必要に応じて他の設定も追加
+}
