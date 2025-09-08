@@ -54,3 +54,35 @@ MIT License
 
 ---
 ご質問・不具合はIssueまたはPRでご連絡ください。
+
+## 三目並べ（Tic-Tac-Toe）GUI + ChatGPT
+
+`tictactoe_gui_chatgpt.py` は、三目並べ（Tic-Tac-Toe）をChatGPTまたはローカルAIと対戦できるGUIアプリです。
+
+### 特徴
+- 先手・後手・終了を選択してゲーム開始
+- マウスまたは数字キー（1～9）で着手可能
+    - 盤面の空きマスには対応する数字が薄く表示されます
+- ChatGPT (OpenAI API) を使ったAI対戦（APIキーが必要）
+- APIキーが無い場合やクォータ超過時はローカルAIで応答
+- 勝敗決定後は再度手番選択ダイアログ表示
+- macOS/Windows/Linux で動作
+
+### 実行方法
+```sh
+python3 tictactoe_gui_chatgpt.py
+```
+
+### 環境変数
+- `OPENAI_API_KEY` : OpenAIのAPIキー（省略時はローカルAI）
+- `OPENAI_MODEL`   : 例 `gpt-3.5-turbo` など
+- `TTT_OFFLINE`    : '1' で強制ローカルAI
+
+### 操作方法
+- マウスで空きマスをクリック、または数字キー（1～9）で着手
+    - 1=左上, 2=上中央, 3=右上, ... 9=右下
+- 空きマスには対応する数字が薄く表示されます
+- 勝敗決定後は「先手・後手・終了」ダイアログが再表示されます
+
+### ファイル構成への追記
+- `tictactoe_gui_chatgpt.py` : 三目並べ（Tic-Tac-Toe）GUIアプリ
