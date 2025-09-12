@@ -132,7 +132,7 @@ class AIPlayer:
         if self.ai_type == "offline":
             mv = best_legal_move(board, mark)
             return {"move": mv, "reason": "オフラインAI"}
-        
+
         prompt = self.build_prompt(board, mark)
         try:
             if self.ai_type == "openai":
@@ -181,7 +181,7 @@ class AIPlayer:
                 text = text.split("```json")[1].split("```")[0]
             elif "```" in text:
                 text = text.split("```")[1].split("```")[0]
-            
+
             return json.loads(text)
         except (json.JSONDecodeError, IndexError):
             # Fallback for non-json responses
@@ -264,49 +264,67 @@ class TicTacToeGUI:
         dialog.title("対戦モードを選択")
 
         # --- Player X Selection ---
+        from player_human import PlayerHuman
+        from player_local_random import PlayerLocalRandom
+        from player_local_minimax import PlayerLocalMinimax
+        from player_openai import PlayerOpenAI
+        from player_gemini import PlayerGemini
+        player_types = [
+            ("human", PlayerHuman.CLASS_LABEL),
+            ("openai", PlayerOpenAI.CLASS_LABEL),
+            ("gemini", PlayerGemini.CLASS_LABEL),
+            ("local_random", PlayerLocalRandom.CLASS_LABEL),
+            ("local_minimax", PlayerLocalMinimax.CLASS_LABEL),
+            ("offline", "オフライン(従来)AI")
+        ]
         tk.Label(dialog, text="先手 (X):", font=("Arial", 12, "bold")).pack(anchor='w', padx=10, pady=5)
         x_player_var = tk.StringVar(value=self.last_x_player)
         x_frame = tk.Frame(dialog)
-        tk.Radiobutton(x_frame, text="人間", variable=x_player_var, value='human').pack(side='left')
-        tk.Radiobutton(x_frame, text="OpenAI", variable=x_player_var, value='openai').pack(side='left')
-        tk.Radiobutton(x_frame, text="Gemini", variable=x_player_var, value='gemini').pack(side='left')
-        tk.Radiobutton(x_frame, text="オフライン", variable=x_player_var, value='offline').pack(side='left')
+        for value, label in player_types:
+            tk.Radiobutton(x_frame, text=label, variable=x_player_var, value=value).pack(side='left')
         x_frame.pack(padx=20, anchor='w')
 
-        # --- Player O Selection ---
         tk.Label(dialog, text="後手 (O):", font=("Arial", 12, "bold")).pack(anchor='w', padx=10, pady=5)
         o_player_var = tk.StringVar(value=self.last_o_player)
         o_frame = tk.Frame(dialog)
-        tk.Radiobutton(o_frame, text="人間", variable=o_player_var, value='human').pack(side='left')
-        tk.Radiobutton(o_frame, text="OpenAI", variable=o_player_var, value='openai').pack(side='left')
-        tk.Radiobutton(o_frame, text="Gemini", variable=o_player_var, value='gemini').pack(side='left')
-        tk.Radiobutton(o_frame, text="オフライン", variable=o_player_var, value='offline').pack(side='left')
+        for value, label in player_types:
+            tk.Radiobutton(o_frame, text=label, variable=o_player_var, value=value).pack(side='left')
         o_frame.pack(padx=20, anchor='w')
 
         def start_game():
             x_player = x_player_var.get()
             o_player = o_player_var.get()
-            
             self.last_x_player = x_player
             self.last_o_player = o_player
-            
             dialog.destroy()
+
+            def make_ai(ai_type):
+                if ai_type == 'local_random':
+                    from player_local_random import PlayerLocalRandom
+                    return PlayerLocalRandom()
+                elif ai_type == 'local_minimax':
+                    from player_local_minimax import PlayerLocalMinimax
+                    return PlayerLocalMinimax()
+                elif ai_type in ['openai', 'gemini', 'offline']:
+                    return AIPlayer(ai_type)
+                else:
+                    return None
 
             if x_player == 'human' and o_player == 'human':
                 self.game_mode = 'hvh'
                 self.start_human_vs_human()
             elif x_player == 'human':
                 self.game_mode = 'hva'
-                self.ai = AIPlayer(o_player)
+                self.ai = make_ai(o_player)
                 self.set_human_player(X)
             elif o_player == 'human':
                 self.game_mode = 'hva'
-                self.ai = AIPlayer(x_player)
+                self.ai = make_ai(x_player)
                 self.set_human_player(O)
             else: # AI vs AI
                 self.game_mode = 'ava'
-                self.ai_x = AIPlayer(x_player)
-                self.ai_o = AIPlayer(o_player)
+                self.ai_x = make_ai(x_player)
+                self.ai_o = make_ai(o_player)
                 self.start_ai_vs_ai()
 
         button_frame = tk.Frame(dialog)
@@ -317,7 +335,7 @@ class TicTacToeGUI:
 
         btn_quit = tk.Button(button_frame, text="ゲーム終了", width=12, command=lambda: (dialog.destroy(), self.root.destroy()))
         btn_quit.pack(side='right', padx=10)
-        
+
         dialog.transient(self.root)
         dialog.grab_set()
         self.root.wait_window(dialog)
@@ -336,14 +354,15 @@ class TicTacToeGUI:
             return
 
         ai = self.ai_x if self.turn == X else self.ai_o
-        
+
         t0 = time.time()
         result = ai.choose(self.board, self.turn)
         dt = time.time() - t0
         mv = result.get("move")
         reason = result.get("reason", "")
-        
-        if mv and isinstance(mv, list): mv = tuple(mv)
+
+        if mv and isinstance(mv, list):
+            mv = tuple(mv)
 
         if mv and isinstance(mv, tuple) and len(mv) == 2 and mv[0] is not None and mv[1] is not None:
             res = apply_move(self.board, mv[0], mv[1], self.turn)
@@ -371,9 +390,9 @@ class TicTacToeGUI:
         self.info.config(text=self.status_text())
         self.root.after(1000, self.ai_vs_ai_move) # 1秒待って次の手
 
-    
 
-    
+
+
 
     def set_human_player(self, player):
         self.human_player = player
@@ -387,7 +406,7 @@ class TicTacToeGUI:
         self.draw()
         self.info.config(text=self.status_text())
         self.advice.delete("1.0", tk.END)
-        
+
         if self.ai:
             msg = f"AI ({self.ai.ai_type}) との対戦を開始します。"
             if self.ai.ai_type == 'gemini' and not self.ai.gemini_available:
@@ -447,8 +466,9 @@ class TicTacToeGUI:
         dt = time.time() - t0
         mv = result.get("move")
         reason = result.get("reason", "")
-        
-        if mv and isinstance(mv, list): mv = tuple(mv)
+
+        if mv and isinstance(mv, list):
+            mv = tuple(mv)
 
         if mv and isinstance(mv, tuple) and len(mv) == 2 and mv[0] is not None and mv[1] is not None:
             res = apply_move(self.board, mv[0], mv[1], ai_mark)
