@@ -90,28 +90,18 @@ def count_neighbors_torus(grid, x, y):
 # コマンドライン引数で rowsxcols, n_gliders を指定可能に
 # 使い方: python game-01.py [rowsxcols] [n_gliders]
 # 例: python game-01.py 60x40 5
-if len(sys.argv) > 2:
-    m = re.match(r'^(\d+)x(\d+)$', sys.argv[1])
-    if m:
-        rows = int(m.group(1))
-        cols = int(m.group(2))
-        try:
-            n_gliders = int(sys.argv[2])
-        except ValueError:
-            print("Usage: python game-01.py [rowsxcols] [n_gliders]")
-            sys.exit(1)
-    else:
+if len(sys.argv) > 2 and (m := re.match(r'^(\d+)x(\d+)$', sys.argv[1])):
+    rows = int(m.group(1))
+    cols = int(m.group(2))
+    try:
+        n_gliders = int(sys.argv[2])
+    except ValueError:
         print("Usage: python game-01.py [rowsxcols] [n_gliders]")
         sys.exit(1)
-elif len(sys.argv) > 1:
-    m = re.match(r'^(\d+)x(\d+)$', sys.argv[1])
-    if m:
-        rows = int(m.group(1))
-        cols = int(m.group(2))
-        n_gliders = 3
-    else:
-        print("Usage: python game-01.py [rowsxcols] [n_gliders]")
-        sys.exit(1)
+elif len(sys.argv) > 1 and (m := re.match(r'^(\d+)x(\d+)$', sys.argv[1])):
+    rows = int(m.group(1))
+    cols = int(m.group(2))
+    n_gliders = 3
 else:
     rows, cols, n_gliders = 50, 50, 3
 
@@ -196,20 +186,23 @@ ani = start_animation()
 # -----------------------------
 # キー操作
 # -----------------------------
+def update_animation_interval(new_interval):
+    """アニメーションintervalを安全に更新"""
+    global interval, ani, paused
+    interval = max(10, int(new_interval))
+    if ani is not None:
+        ani.event_source.stop()
+        ani.event_source.interval = interval
+        if not paused:
+            ani.event_source.start()
+
 def on_key(event):
     global ani, paused, interval, help_text_obj, step_interval, _frame_counter, torus_grid, klein_grid
     # 数字キー(1..9)でstep_intervalを変更
     if event.key in [str(i) for i in range(1, 10)]:
-        # step_intervalとintervalを連動させて見た目の画面更新頻度を一定に保つ
         step_interval = int(event.key)
         base_interval = 100  # 1世代ごとの基準速度（ms）
-        # step_intervalが大きいほどintervalは短く（画面更新が速く）
-        interval = max(10, int(base_interval * (1.0 / step_interval)))
-        if ani is not None:
-            ani.event_source.stop()
-            ani.event_source.interval = interval
-            if not paused:
-                ani.event_source.start()
+        update_animation_interval(base_interval * (1.0 / step_interval))
         _frame_counter = 0
         print(f"画面更新を{step_interval}世代ごとに設定（interval={interval}msに自動調整）")
         return
@@ -224,13 +217,11 @@ def on_key(event):
             'h, ? : このヘルプをトグル表示'
         )
         if help_text_obj is not None:
-            # 既に表示中なら消す＆アニメ再開
             help_text_obj.remove()
             help_text_obj = None
             paused = False
             fig.canvas.draw_idle()
             return
-        # 非表示なら表示＆アニメ停止
         fontdict = {'fontsize': 14, 'color': 'white', 'fontname': 'Hiragino Sans'}
         help_text_obj = fig.text(
             0.5, 0.95, help_text, ha='center', va='top', fontdict=fontdict, zorder=100,
@@ -240,27 +231,14 @@ def on_key(event):
         fig.canvas.draw_idle()
         return
     if event.key == '+':
-        interval = max(10, interval - 20)
-        if ani is not None:
-            ani.event_source.stop()
-            ani.event_source.interval = interval
-            if not paused:
-                ani.event_source.start()
+        update_animation_interval(interval - 20)
         print(f"Speed up: interval={interval} ms")
     elif event.key == '-':
-        interval = interval + 20
-        if ani is not None:
-            ani.event_source.stop()
-            ani.event_source.interval = interval
-            if not paused:
-                ani.event_source.start()
+        update_animation_interval(interval + 20)
         print(f"Slow down: interval={interval} ms")
     elif event.key == ' ':
         paused = not paused
-        if paused:
-            print("Paused")
-        else:
-            print("Resumed")
+        print("Paused" if paused else "Resumed")
     elif event.key == 'q':
         print("Quit.")
         plt.close(fig)
